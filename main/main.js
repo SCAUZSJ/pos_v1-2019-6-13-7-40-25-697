@@ -10,8 +10,14 @@ function printReceipt(inputs) {
     inputs.forEach(item => {
       let barcode =item.indexOf("-") === -1? item :item.split("-")[0];
       let addNum = item.indexOf("-") === -1? 1 :item.split("-")[1];
-      obj[item] = item in obj ? ++obj[item] : 1;
+      if(item.indexOf("-")!=-1){
+        obj[item] = item in obj ? ++obj[item] : 1;
+      }else{
+        let arr = item.split("-");
+        obj[arr[0]] = arr[0] in obj ? obj[arr[0]]+parseFloat(arr[1]) : parseFloat(arr[1]);
+      }
     });
+    console.log(obj)
     return obj;
   }
   function createReceipt(obj){
