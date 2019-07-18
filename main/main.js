@@ -18,22 +18,42 @@ function objectConversionforMergeRepeat(inputs) {
   return obj;
 }
 function createReceipt(obj) {
-  let output = `***<没钱赚商店>收据***\n`;
   let items = loadAllItems();
-  let total = 0;
-  let free = 0;
+  let output = '', total = 0 , discount = 0;
+  output = printReceiptTitle(output);
   for (var pro in obj) {
     let item = items.find((val) => {
       return pro == val.barcode
     })
     total += obj[pro] * item.price;
     let canPromotio = isPromotion(pro, obj[pro]) ;
-    free += canPromotio ? item.price : 0;
-    output += `名称：${item.name}，数量：${obj[pro]}${item.unit}，单价：${item.price.toFixed(2)}(元)，小计：${((obj[pro] * item.price)-(canPromotio ?item.price:0)).toFixed(2)}(元)\n`
+    discount += (canPromotio&&item.price);
+    output = printReceiptItem(output,{
+      name:item.name,
+      count:obj[pro],
+      unit:item.unit,
+      price:item.price.toFixed(2),
+      total:((obj[pro] * item.price)-(canPromotio&&item.price)).toFixed(2)
+    })
   }
-  output += `----------------------\n总计：${(total-free).toFixed(2)}(元)\n节省：${free.toFixed(2)}(元)\n**********************`
+  output = printReceiptFoot(output,{
+    total:(total-discount).toFixed(2),
+    discount:discount.toFixed(2)
+  })
+  
   return output;
 }
+function printReceiptTitle(output){
+  return output+=`***<没钱赚商店>收据***\n`;
+}
+function printReceiptItem(output,item){
+  return output += `名称：${item.name}，数量：${item.count}${item.unit}，单价：${item.price}(元)，小计：${item.total}(元)\n`
+}
+function printReceiptFoot(output,foot){
+  return output += `----------------------\n总计：${foot.total}(元)\n节省：${foot.discount}(元)\n**********************`
+}
+
+
 
 function isPromotion(barcode, count) {
   let promotions = loadPromotions();
